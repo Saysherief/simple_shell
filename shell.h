@@ -12,6 +12,7 @@
 void prompt(void);
 char **handle_args(char *lineptr);
 void handle_EOF(ssize_t nread);
+void exec_command(char **av, char **argv);
 int _strlen(char *s);
 char *_strcpy(char *dest, char *src);
 
