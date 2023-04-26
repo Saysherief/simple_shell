@@ -27,11 +27,6 @@ int main(void)
 		}
 		av[0] = strtok(line, " \n");
 		av[1] = NULL;
-		if (strcmp(av[0], "^D") == 0)
-		{
-			perror("");
-			exit(EXIT_SUCCESS);
-		}
 		pid = fork();
 		if (pid == -1)
 		{
