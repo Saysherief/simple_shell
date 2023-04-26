@@ -7,5 +7,9 @@
  */
 void prompt(void)
 {
-	write(STDOUT_FILENO, "$ ", 2);
+	int mode;
+
+	mode = isatty(STDIN_FILENO);
+	if (mode == 1)
+		write(STDOUT_FILENO, "$ ", 2);
 }

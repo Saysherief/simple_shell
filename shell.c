@@ -8,16 +8,14 @@
 int main(void)
 {
 	char *line, *av[2];
-	int status, mode;
+	int status;
 	size_t size = 0;
 	ssize_t nread;
 	pid_t pid;
 
 	while (1)
 	{
-		mode = isatty(STDIN_FILENO);
-		if (mode == 1)
-			prompt();
+		prompt();
 		line = NULL;
 		nread = getline(&line, &size, stdin);
 		if (nread == -1)
