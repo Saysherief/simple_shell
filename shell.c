@@ -8,10 +8,9 @@
 int main(int argc __attribute__((unused)), char **argv)
 {
 	char *line, **av;
-	int status, i;
+	int i;
 	size_t size = 0;
 	ssize_t nread;
-	pid_t pid;
 
 	while (1)
 	{
@@ -20,26 +19,7 @@ int main(int argc __attribute__((unused)), char **argv)
 		nread = getline(&line, &size, stdin);
 		handle_EOF(nread);
 		av = handle_args(line);
-		pid = fork();
-		if (pid == -1)
-		{
-			perror("fork");
-			exit(EXIT_FAILURE);
-		}
-		else if (pid == 0)
-		{
-			if (execve(av[0], av, NULL) == -1)
-			{
-				perror(argv[0]);
-				exit(EXIT_FAILURE); }
-		}
-		else
-		{
-			if (wait(&status) == -1)
-			{
-				perror("wait");
-				exit(EXIT_FAILURE); }
-		}
+		exec_command(av, argv);
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
@@ -101,5 +81,43 @@ void handle_EOF(ssize_t nread)
 		if (EOF && mode == 1)
 			write(1, "\n", 2);
 		exit(EXIT_FAILURE);
+	}
+}
+
+/**
+ * exec_command - execute the given command
+ * @av: pointer to a pointer
+ * @argv: command-line argument
+ *
+ * Return: nothing
+ */
+void exec_command(char **av, char **argv)
+{
+	int status, i;
+	pid_t pid = fork();
+
+	if (pid == -1)
+	{
+		perror("fork");
+		exit(EXIT_FAILURE);
+	}
+	else if (pid == 0)
+	{
+		if (execve(av[0], av, NULL) == -1)
+		{
+			perror(argv[0]);
+			for (i = 0; av[i]; i++)
+				free(av[i]);
+			free(av);
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		if (wait(&status) == -1)
+		{
+			perror("wait");
+			exit(EXIT_FAILURE);
+		}
 	}
 }
