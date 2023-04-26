@@ -7,8 +7,8 @@
  */
 int main(int argc __attribute__((unused)), char **argv)
 {
-	char *line, *av[2];
-	int status;
+	char *line, **av;
+	int status, i;
 	size_t size = 0;
 	ssize_t nread;
 	pid_t pid;
@@ -18,10 +18,8 @@ int main(int argc __attribute__((unused)), char **argv)
 		prompt();
 		line = NULL;
 		nread = getline(&line, &size, stdin);
-		if (nread == -1) /*perror("getline");*/
-			exit(EXIT_FAILURE);
-		av[0] = strtok(line, " \n");
-		av[1] = NULL;
+		handle_EOF(nread);
+		av = handle_args(line);
 		pid = fork();
 		if (pid == -1)
 		{
@@ -33,18 +31,75 @@ int main(int argc __attribute__((unused)), char **argv)
 			if (execve(av[0], av, NULL) == -1)
 			{
 				perror(argv[0]);
-				exit(EXIT_FAILURE);
-			}
+				exit(EXIT_FAILURE); }
 		}
 		else
 		{
 			if (wait(&status) == -1)
 			{
 				perror("wait");
-				exit(EXIT_FAILURE);
-			}
+				exit(EXIT_FAILURE); }
 		}
+		for (i = 0; av[i]; i++)
+			free(av[i]);
+		free(av);
 		free(line);
 	}
 	return (0);
+}
+
+/**
+ * handle_args - function that will handle command-line args
+ * @lineptr: points to the line read by getline
+ *
+ * Return: pointer  to a pointer
+ */
+char **handle_args(char *lineptr)
+{
+	char *token, **args = NULL;
+	int i, n;
+
+	token = strtok(lineptr, " \n");
+
+	args = malloc(sizeof(char *) * (MAX + 1));
+	if (!args)
+		return (NULL);
+
+	n = 0;
+	while (token && n < MAX)
+	{
+		args[n] = malloc(strlen(token) + 1);
+		if (!args[n])
+		{
+			for (i = 0; i < n; i++)
+				free(args[i]);
+			free(args);
+			return (NULL);
+		}
+		strcpy(args[n], token);
+		n++;
+
+		token = strtok(NULL, " \n");
+	}
+	args[n] = NULL;
+
+	return (args);
+}
+
+/**
+ * handle_EOF - handles EOF
+ * @nread: the return of getline
+ *
+ * Return: nothing
+ */
+void handle_EOF(ssize_t nread)
+{
+	int mode = isatty(STDIN_FILENO);
+
+	if (nread == -1)
+	{
+		if (EOF && mode == 1)
+			printf("\n");
+		exit(EXIT_FAILURE);
+	}
 }
