@@ -68,7 +68,7 @@ char **handle_args(char *lineptr)
 	n = 0;
 	while (token && n < MAX)
 	{
-		args[n] = malloc(strlen(token) + 1);
+		args[n] = malloc(_strlen(token) + 1);
 		if (!args[n])
 		{
 			for (i = 0; i < n; i++)
@@ -76,7 +76,7 @@ char **handle_args(char *lineptr)
 			free(args);
 			return (NULL);
 		}
-		strcpy(args[n], token);
+		_strcpy(args[n], token);
 		n++;
 
 		token = strtok(NULL, " \n");
@@ -99,7 +99,7 @@ void handle_EOF(ssize_t nread)
 	if (nread == -1)
 	{
 		if (EOF && mode == 1)
-			printf("\n");
+			write(1, "\n", 2);
 		exit(EXIT_FAILURE);
 	}
 }
