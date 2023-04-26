@@ -1,11 +1,11 @@
 #include "shell.h"
-
 /**
  * main - simple UNIX command line interpreter
- *
+ * @argc: number of arguments supplied to the program, currently not used on 1
+ * @argv: array of pointers to the strings passed as arguments
  * Return: always 0 (success)
  */
-int main(void)
+int main(int argc __attribute__((unused)), char **argv)
 {
 	char *line, *av[2];
 	int status;
@@ -18,11 +18,8 @@ int main(void)
 		prompt();
 		line = NULL;
 		nread = getline(&line, &size, stdin);
-		if (nread == -1)
-		{
-			/*perror("getline");*/
+		if (nread == -1) /*perror("getline");*/
 			exit(EXIT_FAILURE);
-		}
 		av[0] = strtok(line, " \n");
 		av[1] = NULL;
 		pid = fork();
@@ -35,7 +32,7 @@ int main(void)
 		{
 			if (execve(av[0], av, NULL) == -1)
 			{
-				perror("./hsh");
+				perror(argv[0]);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -47,9 +44,7 @@ int main(void)
 				exit(EXIT_FAILURE);
 			}
 		}
-
 		free(line);
 	}
-
 	return (0);
 }
