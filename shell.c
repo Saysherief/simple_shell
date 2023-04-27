@@ -19,7 +19,6 @@ int main(int argc __attribute__((unused)), char **argv)
 		nread = getline(&line, &size, stdin);
 		if (nread == -1 && size == 0)
 		{
-			printf("\nEnd of file (Ctrl+D) detected. Exiting.\n");
 			free(line);
 			exit(EXIT_SUCCESS);
 		}
