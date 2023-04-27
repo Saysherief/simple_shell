@@ -15,5 +15,6 @@ void handle_EOF(ssize_t nread);
 void exec_command(char **av, char **argv);
 int _strlen(char *s);
 char *_strcpy(char *dest, char *src);
+char *_strcat(char *dest, char *src);
 
 #endif /* SHELL_H */
