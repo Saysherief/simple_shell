@@ -12,4 +12,5 @@ void prompt(void)
 	mode = isatty(STDIN_FILENO);
 	if (mode == 1)
 		write(STDOUT_FILENO, "simple_shell$ ", 14);
+	fflush(stdout);
 }
