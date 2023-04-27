@@ -17,6 +17,12 @@ int main(int argc __attribute__((unused)), char **argv)
 		prompt();
 		line = NULL;
 		nread = getline(&line, &size, stdin);
+		if (nread == -1 && size == 0)
+		{
+			printf("\nEnd of file (Ctrl+D) detected. Exiting.\n");
+			free(line);
+			exit(EXIT_SUCCESS);
+		}
 		handle_EOF(nread);
 		av = handle_args(line);
 		exec_command(av, argv);
