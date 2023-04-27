@@ -1,3 +1,5 @@
+#include "shell.h"
+
 /**
  * *_strcpy - copies the string pointed by src
  * @src: a pointer to the string /the first char on the string
@@ -56,4 +58,59 @@ char *_strcat(char *dest, char *src)
 	}
 	dest[i] = '\0';
 	return (dest);
+}
+
+/**
+ * _itoa - converts int to a string
+ * @num: number to convert
+ *
+ * Return: nothing
+ */
+char *_itoa(int num)
+{
+	char *str = malloc(sizeof(char) * (32 + 1));
+	int i = 0, neg = 0;
+
+	if (num < 0)
+	{
+		neg = 1;
+		num = -num;
+	}
+	do {
+		str[i++] = num % 10 + '0';
+		num /= 10;
+	} while (num > 0);
+	if (neg)
+		str[i++] = '-';
+
+	str[i] = '\0';
+	rev_string(str);
+
+	return (str);
+}
+
+/**
+ * rev_string - reverses a string
+ * @s: the string
+ *
+ * Return: void
+ */
+void rev_string(char *s)
+{
+	int i, len;
+	char tmp;
+
+	len = 0;
+	while (s[len] != '\0')
+	{
+		len++;
+	}
+	len--;
+	for (i = 0; i < len; i++)
+	{
+		tmp = s[i];
+		s[i] = s[len];
+		s[len] = tmp;
+		len--;
+	}
 }
