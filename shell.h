@@ -18,6 +18,7 @@ void handle_EOF(ssize_t nread, char *line);
 int exec_command(char **av, char **argv, char *line);
 void child_process(char **av, char **argv, char *line, int mode, pid_t p_pid);
 void sig_handler(int sig);
+void _free(char *line, char **av);
 int _strlen(char *s);
 char *_strcpy(char *dest, char *src);
 char *_strcat(char *dest, char *src);
