@@ -12,6 +12,7 @@ int main(int argc __attribute__((unused)), char **argv)
 	size_t size = 0;
 	ssize_t nread;
 
+	signal(SIGINT, sig_handler);
 	while (1)
 	{
 		prompt();
@@ -24,12 +25,17 @@ int main(int argc __attribute__((unused)), char **argv)
 		}
 		handle_EOF(nread);
 		av = handle_args(line);
+		if (av[0] == NULL)
+			continue;
+		if (strcmp(av[0], "exit") == 0)
+			break;
 		exec_command(av, argv);
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
 		free(line);
 	}
+	free(line);
 	return (0);
 }
 
@@ -42,28 +48,38 @@ int main(int argc __attribute__((unused)), char **argv)
 char **handle_args(char *lineptr)
 {
 	char *token, **args = NULL;
-	int i, n;
+	int i, n = 0, size = MAX;
+
+	args = malloc(sizeof(char *) * size);
+	if (!args)
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
 
 	token = strtok(lineptr, " \n");
-
-	args = malloc(sizeof(char *) * (MAX + 1));
-	if (!args)
-		return (NULL);
-
-	n = 0;
-	while (token && n < MAX)
+	while (token)
 	{
-		args[n] = malloc(_strlen(token) + 1);
+		if (n >= size - 1)
+		{
+			size += MAX;
+			args = realloc(args, size * sizeof(char *));
+			if (!args)
+			{
+				perror("realloc");
+				exit(EXIT_FAILURE);
+			}
+		}
+		args[n] = strdup(token);
 		if (!args[n])
 		{
+			perror("strdup");
 			for (i = 0; i < n; i++)
 				free(args[i]);
 			free(args);
 			return (NULL);
 		}
-		_strcpy(args[n], token);
 		n++;
-
 		token = strtok(NULL, " \n");
 	}
 	args[n] = NULL;
@@ -85,7 +101,7 @@ void handle_EOF(ssize_t nread)
 	{
 		if (EOF && mode == 1)
 			write(1, "\n", 2);
-		exit(EXIT_FAILURE);
+		exit(EXIT_SUCCESS);
 	}
 }
 
@@ -98,7 +114,7 @@ void handle_EOF(ssize_t nread)
  */
 void exec_command(char **av, char **argv)
 {
-	int status, mode = isatty(STDIN_FILENO);
+	int status, exit_status, mode = isatty(STDIN_FILENO);
 	pid_t p_pid = getpid(), pid = fork();
 
 	if (pid == -1)
@@ -112,10 +128,16 @@ void exec_command(char **av, char **argv)
 	}
 	else
 	{
-		if (wait(&status) == -1)
+		if (waitpid(pid, &status, 0) == -1)
 		{
 			perror("wait");
-			exit(EXIT_FAILURE); }
+			exit(EXIT_FAILURE);
+		}
+		if (WIFEXITED(status))
+		{
+			exit_status = WEXITSTATUS(status);
+			exit(exit_status);
+		}
 	}
 }
 
@@ -154,7 +176,7 @@ void child_process(char **av, char **argv, int mode, pid_t p_pid)
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
-		exit(EXIT_FAILURE); }
+		exit(127); }
 	if (execve(av[0], av, NULL) == -1)
 	{
 		perror(argv[0]);
