@@ -136,7 +136,7 @@ void exec_command(char **av, char **argv)
 		}
 		if (WIFEXITED(status))
 		{
-			WEXITSTATUS(status);
+			exit(WEXITSTATUS(status));
 		}
 	}
 }
