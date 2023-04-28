@@ -14,9 +14,9 @@
 
 void prompt(void);
 char **handle_args(char *lineptr);
-void handle_EOF(ssize_t nread);
-int exec_command(char **av, char **argv);
-void child_process(char **av, char **argv, int mode, pid_t p_pid);
+void handle_EOF(ssize_t nread, char *line);
+int exec_command(char **av, char **argv, char *line);
+void child_process(char **av, char **argv, char *line, int mode, pid_t p_pid);
 void sig_handler(int sig);
 int _strlen(char *s);
 char *_strcpy(char *dest, char *src);

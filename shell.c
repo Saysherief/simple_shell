@@ -19,12 +19,7 @@ int main(int argc __attribute__((unused)), char **argv)
 		prompt();
 		line = NULL;
 		nread = getline(&line, &size, stdin);
-		if (nread == -1 && size == 0)
-		{
-			free(line);
-			exit(EXIT_SUCCESS);
-		}
-		handle_EOF(nread);
+		handle_EOF(nread, line);
 		av = handle_args(line);
 		if (av[0] == NULL)
 			continue;
@@ -34,13 +29,18 @@ int main(int argc __attribute__((unused)), char **argv)
 			{
 				exit_status = atoi(av[1]);
 				free(line);
-				free(av[0]);
+				for (i = 0; av[i]; i++)
+					free(av[i]);
 				free(av);
 				exit(exit_status); }
 			else
-				break;
+			{
+				for (i = 0; av[i]; i++)
+					free(av[i]);
+				free(av);
+				break; }
 		}
-		status = exec_command(av, argv);
+		status = exec_command(av, argv, line);
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
@@ -78,6 +78,7 @@ char **handle_args(char *lineptr)
 			if (!args)
 			{
 				perror("realloc");
+				free(args);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -101,10 +102,11 @@ char **handle_args(char *lineptr)
 /**
  * handle_EOF - handles EOF
  * @nread: the return of getline
+ * @line: pointer
  *
  * Return: nothing
  */
-void handle_EOF(ssize_t nread)
+void handle_EOF(ssize_t nread, char *line)
 {
 	int mode = isatty(STDIN_FILENO);
 
@@ -112,6 +114,7 @@ void handle_EOF(ssize_t nread)
 	{
 		if (EOF && mode == 1)
 			write(1, "\n", 2);
+		free(line);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -120,10 +123,11 @@ void handle_EOF(ssize_t nread)
  * exec_command - execute the given command
  * @av: pointer to a pointer
  * @argv: command-line argument
+ * @line: pointer
  *
  * Return: nothing
  */
-int exec_command(char **av, char **argv)
+int exec_command(char **av, char **argv, char *line)
 {
 	int status, mode = isatty(STDIN_FILENO);
 	pid_t p_pid = getpid(), pid = fork();
@@ -131,11 +135,12 @@ int exec_command(char **av, char **argv)
 	if (pid == -1)
 	{
 		perror("fork");
+		free(line);
 		exit(EXIT_FAILURE);
 	}
 	else if (pid == 0)
 	{
-		child_process(av, argv, mode, p_pid);
+		child_process(av, argv, line, mode, p_pid);
 	}
 	else
 	{
@@ -160,10 +165,11 @@ int exec_command(char **av, char **argv)
  * @argv: pointer to pointer
  * @mode: return of isatty
  * @p_pid: parent pid
+ * @line: pointer
  *
  * Return: nothing
  */
-void child_process(char **av, char **argv, int mode, pid_t p_pid)
+void child_process(char **av, char **argv, char *line, int mode, pid_t p_pid)
 {
 	int i, c_line;
 	char *st_line, *error_msg, *not_found_msg;
@@ -180,6 +186,7 @@ void child_process(char **av, char **argv, int mode, pid_t p_pid)
 			st_line = _itoa(c_line);
 			error_msg = _strcat(argv[0], ": ");
 			error_msg = _strcat(error_msg, st_line);
+			free(st_line);
 			error_msg = _strcat(error_msg, ": ");
 		}
 		write(STDERR_FILENO, error_msg, _strlen(error_msg));
@@ -189,13 +196,14 @@ void child_process(char **av, char **argv, int mode, pid_t p_pid)
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
+		free(line);
 		exit(127);
 	}
 	if (execve(av[0], av, NULL) == -1)
 	{
 		perror(argv[0]);
-		for (i = 0; av[i]; i++)
-			free(av[i]);
-		free(av);
 		exit(127); }
+	for (i = 0; av[i]; i++)
+		free(av[i]);
+	free(av);
 }
