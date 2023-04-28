@@ -36,8 +36,7 @@ int main(int argc __attribute__((unused)), char **argv)
 				free(line);
 				free(av[0]);
 				free(av);
-				exit(exit_status);
-			}
+				exit(exit_status); }
 			else
 				break;
 		}
@@ -45,6 +44,7 @@ int main(int argc __attribute__((unused)), char **argv)
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
+		free(line);
 	}
 	free(line);
 	return (status);
