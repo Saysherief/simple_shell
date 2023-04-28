@@ -9,7 +9,7 @@
 int main(int argc __attribute__((unused)), char **argv)
 {
 	char *line, **av;
-	int i;
+	int i, status = 0, exit_status;
 	size_t size = 0;
 	ssize_t nread;
 
@@ -29,15 +29,25 @@ int main(int argc __attribute__((unused)), char **argv)
 		if (av[0] == NULL)
 			continue;
 		if (strcmp(av[0], "exit") == 0)
-			break;
-		exec_command(av, argv);
+		{
+			if (av[1])
+			{
+				exit_status = atoi(av[1]);
+				free(line);
+				free(av[0]);
+				free(av);
+				exit(exit_status);
+			}
+			else
+				break;
+		}
+		status = exec_command(av, argv);
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
-		free(line);
 	}
 	free(line);
-	return (0);
+	return (status);
 }
 
 /**
@@ -113,7 +123,7 @@ void handle_EOF(ssize_t nread)
  *
  * Return: nothing
  */
-void exec_command(char **av, char **argv)
+int exec_command(char **av, char **argv)
 {
 	int status, mode = isatty(STDIN_FILENO);
 	pid_t p_pid = getpid(), pid = fork();
@@ -131,14 +141,17 @@ void exec_command(char **av, char **argv)
 	{
 		if (waitpid(pid, &status, 0) == -1)
 		{
-			perror("wait");
+			perror("waitpid");
 			exit(EXIT_FAILURE);
 		}
 		if (WIFEXITED(status))
-		{
-			exit(WEXITSTATUS(status));
-		}
+			return (WEXITSTATUS(status));
+		else if (WIFSIGNALED(status))
+			return (128 + WTERMSIG(status));
+		else
+			return (status);
 	}
+	return (1);
 }
 
 /**
@@ -176,12 +189,13 @@ void child_process(char **av, char **argv, int mode, pid_t p_pid)
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
-		exit(127); }
+		exit(127);
+	}
 	if (execve(av[0], av, NULL) == -1)
 	{
 		perror(argv[0]);
 		for (i = 0; av[i]; i++)
 			free(av[i]);
 		free(av);
-		exit(EXIT_FAILURE); }
+		exit(127); }
 }
