@@ -1,4 +1,5 @@
 #include "shell.h"
+
 /**
  * main - simple UNIX command line interpreter
  * @argc: number of arguments supplied to the program, currently not used on 1
@@ -114,7 +115,7 @@ void handle_EOF(ssize_t nread)
  */
 void exec_command(char **av, char **argv)
 {
-	int status, exit_status, mode = isatty(STDIN_FILENO);
+	int status, mode = isatty(STDIN_FILENO);
 	pid_t p_pid = getpid(), pid = fork();
 
 	if (pid == -1)
@@ -135,8 +136,7 @@ void exec_command(char **av, char **argv)
 		}
 		if (WIFEXITED(status))
 		{
-			exit_status = WEXITSTATUS(status);
-			exit(exit_status);
+			WEXITSTATUS(status);
 		}
 	}
 }
