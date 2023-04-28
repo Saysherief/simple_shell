@@ -38,6 +38,11 @@ int main(int argc __attribute__((unused)), char **argv)
 				_free(NULL, av);
 				break; }
 		}
+		if (strcmp(av[0], "env") == 0)
+		{
+			_env();
+			_free(line, av);
+			continue; }
 		status = exec_command(av, argv, line);
 		_free(line, av);
 	}
