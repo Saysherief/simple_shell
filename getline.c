@@ -31,7 +31,6 @@ void my_exit(char **argv, char **av, char *line)
 			status = atoi(av[1]);
 			if (status <= 0)
 			{
-				printf("after\n");
 				fprintf(stderr, "%s: 1: exit: Illegal number: %s\n", argv[0], av[1]);
 				_free(line, av);
 				exit(2);
