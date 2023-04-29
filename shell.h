@@ -26,5 +26,6 @@ char *_strcpy(char *dest, char *src);
 char *_strcat(char *dest, char *src);
 char *_itoa(int num);
 void rev_string(char *s);
+ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 
 #endif /* SHELL_H */
