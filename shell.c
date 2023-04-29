@@ -18,7 +18,7 @@ int main(int argc __attribute__((unused)), char **argv)
 	{
 		prompt();
 		line = NULL;
-		nread = getline(&line, &size, stdin);
+		nread = _getline(&line, &size, stdin);
 		handle_EOF(nread, line);
 		av = handle_args(line);
 		if (av[0] == NULL)
