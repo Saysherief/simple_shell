@@ -9,7 +9,7 @@
 int main(int argc __attribute__((unused)), char **argv)
 {
 	char *line, **av;
-	int status = 0, exit_status;
+	int status = 0;
 	size_t size = 0;
 	ssize_t nread;
 
@@ -26,17 +26,11 @@ int main(int argc __attribute__((unused)), char **argv)
 			free(line);
 			free(av);
 			continue; }
-		if (strcmp(av[0], "exit") == 0)
+		my_exit(argv, av, line);
+		if (strcmp(av[0], "exit") == 0 && !av[1])
 		{
-			if (av[1])
-			{
-				exit_status = atoi(av[1]);
-				_free(line, av);
-				exit(exit_status); }
-			else
-			{
-				_free(NULL, av);
-				break; }
+			_free(NULL, av);
+			break;
 		}
 		if (strcmp(av[0], "env") == 0)
 		{

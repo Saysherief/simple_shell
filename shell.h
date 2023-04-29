@@ -20,6 +20,7 @@ int exec_command(char **av, char **argv, char *line);
 void child_process(char **av, char **argv, char *line, int mode, pid_t p_pid);
 void sig_handler(int sig);
 void _env(void);
+void my_exit(char **argv, char **av, char *line);
 void _free(char *line, char **av);
 int _strlen(char *s);
 char *_strcpy(char *dest, char *src);
